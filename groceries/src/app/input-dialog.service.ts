@@ -2,50 +2,60 @@ import { Injectable } from '@angular/core';
 import { GroceriesServicesService } from './groceries.service';
 import { AlertController } from '@ionic/angular';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class InputDialogService {
-  async presentAlert(n?, index ?) {
-    const alert = await this.alertCtrl.create({
-      header: n? 'Edit item on the list' : 'Add item to the list',
-      message: n? 'Edit item and/or quantity' : 'Specify item and quantity',
-      inputs: [
-        {
-          name: 'itemName',
-          placeholder: 'Item Name',
-          value: n? n.itemName : null
-        },
-        {
-          name: 'qty',
-          placeholder: 'Quantity',
-          value: n? n.qty : null
-        },
-      ],
-      buttons: [
-        {
-        text: 'Cancel',
-        handler: data => {
-          console.log('Cancel clicked');
-        }
-      },
-      {
-        text: 'Save',
-        handler: item => {
-          console.log('Saved clicked', item);
-          if (index !== undefined) {
-            this.dataService.editItem(item, index);
-          } else {
-            this.dataService.addItem(item)
-          }
-        }
-      }]
-    });
-    alert.present();
-   }
-
   constructor(
-    public alertCtrl: AlertController, 
-    public dataService: GroceriesServicesService) { }
+    public alertCtrl: AlertController,
+    public dataService: GroceriesServicesService
+  ) {}
+
+  async presentAlert(item?, itemId?) {
+    // tslint:disable-next-line: no-unused-expression
+    item ? item._id : undefined;
+    {
+      const alert = await this.alertCtrl.create({
+        header: item ? 'Edit item on the list' : 'Add item to the list',
+        message: !itemId?.length
+          ? 'Specify item and quantity'
+          : 'Edit item and/or quantity',
+        inputs: [
+          {
+            name: 'name',
+            placeholder: 'Item Name',
+            value: item ? item.name : null,
+          },
+          {
+            name: 'quantity',
+            placeholder: 'Quantity',
+            value: item ? item.quantity : null,
+          },
+        ],
+        buttons: [
+          {
+            text: 'Cancel',
+            handler: (data) => {
+              console.log('Cancel clicked');
+            },
+          },
+          {
+            text: !itemId?.length ? 'Save' : 'Edit',
+            // tslint:disable-next-line: no-shadowed-variable
+            handler: (item) => {
+              console.log('Saved clicked:', { item, itemId });
+              if (!itemId?.length) {
+                this.dataService.addItem(item);
+                console.log('input dialog controller, addItem');
+              } else {
+                console.log('input dialog controller, editItem');
+                this.dataService.editItem(item, itemId);
+              }
+            },
+          },
+        ],
+      });
+      alert.present();
+    }
+  }
 }
